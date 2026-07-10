@@ -1,0 +1,61 @@
+{
+  "name": "ember multi asset",
+  "assets": [
+    { "id": "usd", "symbol": "USD", "decimals": 2 },
+    { "id": "eur", "symbol": "EUR", "decimals": 2 }
+  ],
+  "accounts": [
+    { "id": "treasury", "role": "treasury" },
+    { "id": "merchant", "role": "merchant" },
+    { "id": "borrower", "role": "borrower" },
+    { "id": "operator", "role": "operator" }
+  ],
+  "steps": [
+    { "action": "fund", "accountId": "treasury", "asset": "usd", "amount": 20000 },
+    { "action": "fund", "accountId": "treasury", "asset": "eur", "amount": 10000 },
+    { "action": "fund", "accountId": "borrower", "asset": "usd", "amount": 3000 },
+    { "action": "fund", "accountId": "borrower", "asset": "eur", "amount": 3000 },
+    { "action": "open_reserve", "id": "usd-res", "owner": "treasury", "asset": "usd" },
+    { "action": "open_reserve", "id": "eur-res", "owner": "treasury", "asset": "eur" },
+    {
+      "action": "deposit_reserve",
+      "reserveId": "usd-res",
+      "accountId": "treasury",
+      "asset": "usd",
+      "amount": 8000
+    },
+    {
+      "action": "deposit_reserve",
+      "reserveId": "eur-res",
+      "accountId": "treasury",
+      "asset": "eur",
+      "amount": 4000
+    },
+    { "action": "contribute", "accountId": "treasury", "asset": "usd", "amount": 1000 },
+    { "action": "contribute", "accountId": "treasury", "asset": "eur", "amount": 500 },
+    {
+      "action": "open_facility",
+      "id": "fac-usd",
+      "reserveId": "usd-res",
+      "borrower": "borrower",
+      "beneficiary": "merchant",
+      "operator": "operator",
+      "asset": "usd",
+      "principal": 3000,
+      "dueEpoch": 4
+    },
+    {
+      "action": "open_facility",
+      "id": "fac-eur",
+      "reserveId": "eur-res",
+      "borrower": "borrower",
+      "beneficiary": "merchant",
+      "operator": "operator",
+      "asset": "eur",
+      "principal": 2000,
+      "dueEpoch": 4
+    },
+    { "action": "repay", "facilityId": "fac-usd", "amount": 1000 },
+    { "action": "validate" }
+  ]
+}

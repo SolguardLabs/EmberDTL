@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run reserve fixture",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/src/cmd/emberdtl",
+      "args": ["run", "tests/fixtures/reserve_cycle.json", "--events"]
+    }
+  ]
+}

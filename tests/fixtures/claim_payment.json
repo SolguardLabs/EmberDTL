@@ -1,0 +1,54 @@
+{
+  "name": "ember claim payment",
+  "policy": {
+    "defaultGraceEpochs": 0
+  },
+  "assets": [{ "id": "usd", "symbol": "USD", "decimals": 2 }],
+  "accounts": [
+    { "id": "treasury", "role": "treasury" },
+    { "id": "merchant", "role": "merchant" },
+    { "id": "borrower", "role": "borrower" },
+    { "id": "operator", "role": "operator" }
+  ],
+  "steps": [
+    { "action": "fund", "accountId": "treasury", "asset": "usd", "amount": 20000 },
+    { "action": "open_reserve", "id": "ember-usd", "owner": "treasury", "asset": "usd" },
+    {
+      "action": "deposit_reserve",
+      "reserveId": "ember-usd",
+      "accountId": "treasury",
+      "asset": "usd",
+      "amount": 10000
+    },
+    { "action": "contribute", "accountId": "treasury", "asset": "usd", "amount": 3000 },
+    {
+      "action": "open_facility",
+      "id": "fac-loss",
+      "reserveId": "ember-usd",
+      "borrower": "borrower",
+      "beneficiary": "merchant",
+      "operator": "operator",
+      "asset": "usd",
+      "principal": 5000,
+      "dueEpoch": 1
+    },
+    { "action": "advance", "to": 2 },
+    {
+      "action": "report_default",
+      "id": "def-1",
+      "facilityId": "fac-loss",
+      "reporter": "operator",
+      "amount": 2000
+    },
+    {
+      "action": "register_claim",
+      "id": "claim-1",
+      "defaultId": "def-1",
+      "claimant": "merchant",
+      "payoutAccount": "merchant",
+      "amount": 1000
+    },
+    { "action": "execute_claim", "claimId": "claim-1" },
+    { "action": "validate" }
+  ]
+}

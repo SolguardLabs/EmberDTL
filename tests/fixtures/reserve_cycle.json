@@ -1,0 +1,36 @@
+{
+  "name": "ember reserve cycle",
+  "assets": [{ "id": "usd", "symbol": "USD", "decimals": 2 }],
+  "accounts": [
+    { "id": "treasury", "role": "treasury" },
+    { "id": "merchant", "role": "merchant" },
+    { "id": "borrower", "role": "borrower" },
+    { "id": "operator", "role": "operator" }
+  ],
+  "steps": [
+    { "action": "fund", "accountId": "treasury", "asset": "usd", "amount": 20000 },
+    { "action": "fund", "accountId": "borrower", "asset": "usd", "amount": 7000 },
+    { "action": "open_reserve", "id": "ember-usd", "owner": "treasury", "asset": "usd" },
+    {
+      "action": "deposit_reserve",
+      "reserveId": "ember-usd",
+      "accountId": "treasury",
+      "asset": "usd",
+      "amount": 12000
+    },
+    { "action": "contribute", "accountId": "treasury", "asset": "usd", "amount": 1000 },
+    {
+      "action": "open_facility",
+      "id": "fac-1",
+      "reserveId": "ember-usd",
+      "borrower": "borrower",
+      "beneficiary": "merchant",
+      "operator": "operator",
+      "asset": "usd",
+      "principal": 4000,
+      "dueEpoch": 3
+    },
+    { "action": "repay", "facilityId": "fac-1", "amount": 2500 },
+    { "action": "validate" }
+  ]
+}

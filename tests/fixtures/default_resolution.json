@@ -1,0 +1,62 @@
+{
+  "name": "ember default resolution",
+  "policy": {
+    "defaultGraceEpochs": 0
+  },
+  "assets": [{ "id": "usd", "symbol": "USD", "decimals": 2 }],
+  "accounts": [
+    { "id": "treasury", "role": "treasury" },
+    { "id": "merchant", "role": "merchant" },
+    { "id": "borrower", "role": "borrower" },
+    { "id": "operator", "role": "operator" }
+  ],
+  "steps": [
+    { "action": "fund", "accountId": "treasury", "asset": "usd", "amount": 15000 },
+    { "action": "fund", "accountId": "borrower", "asset": "usd", "amount": 3000 },
+    { "action": "open_reserve", "id": "ember-usd", "owner": "treasury", "asset": "usd" },
+    {
+      "action": "deposit_reserve",
+      "reserveId": "ember-usd",
+      "accountId": "treasury",
+      "asset": "usd",
+      "amount": 8000
+    },
+    { "action": "contribute", "accountId": "treasury", "asset": "usd", "amount": 2000 },
+    {
+      "action": "open_facility",
+      "id": "fac-recovery",
+      "reserveId": "ember-usd",
+      "borrower": "borrower",
+      "beneficiary": "merchant",
+      "operator": "operator",
+      "asset": "usd",
+      "principal": 3000,
+      "dueEpoch": 1
+    },
+    { "action": "advance", "to": 2 },
+    {
+      "action": "report_default",
+      "id": "def-recovery",
+      "facilityId": "fac-recovery",
+      "reporter": "operator",
+      "amount": 1000,
+      "expectedRecovery": 100
+    },
+    {
+      "action": "register_claim",
+      "id": "claim-recovery",
+      "defaultId": "def-recovery",
+      "claimant": "merchant",
+      "payoutAccount": "merchant",
+      "amount": 500
+    },
+    { "action": "execute_claim", "claimId": "claim-recovery" },
+    {
+      "action": "resolve_default",
+      "defaultId": "def-recovery",
+      "recoveryFrom": "borrower",
+      "recoveryAmount": 100
+    },
+    { "action": "validate" }
+  ]
+}

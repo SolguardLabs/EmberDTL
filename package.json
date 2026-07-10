@@ -1,0 +1,20 @@
+{
+  "name": "emberdtl",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Go settlement service with internal insurance accounting and TypeScript integration tests.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node scripts/build.mjs && node --test --experimental-strip-types \"tests/node/*.test.ts\"",
+    "ci": "bash scripts/ci.sh",
+    "loc": "node scripts/check-loc.mjs",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

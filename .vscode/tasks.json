@@ -1,0 +1,32 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "node scripts/build.mjs",
+      "group": "build",
+      "problemMatcher": "$go"
+    },
+    {
+      "label": "test",
+      "type": "shell",
+      "command": "node --test --experimental-strip-types \"tests/node/*.test.ts\"",
+      "dependsOn": "build",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "ci",
+      "type": "shell",
+      "command": "bash scripts/ci.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "loc",
+      "type": "shell",
+      "command": "node scripts/check-loc.mjs",
+      "problemMatcher": []
+    }
+  ]
+}
