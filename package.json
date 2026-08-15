@@ -1,13 +1,14 @@
 {
   "name": "emberdtl",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "Go settlement service with internal insurance accounting and TypeScript integration tests.",
+  "description": "Motor determinista de liquidación diferida, reservas e insurance por activo.",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node scripts/build.mjs && node --test --experimental-strip-types \"tests/node/*.test.ts\"",
     "ci": "bash scripts/ci.sh",
+    "verify:release": "node scripts/verify-release.mjs",
     "loc": "node scripts/check-loc.mjs",
     "format:check": "prettier --check ."
   },

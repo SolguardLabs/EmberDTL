@@ -8,6 +8,7 @@ const binDir = join(root, "bin");
 const exeName = process.platform === "win32" ? "emberdtl.exe" : "emberdtl";
 const output = join(binDir, exeName);
 const args = new Set(process.argv.slice(2));
+const portableGo = join(root, "..", ".toolchains", "go1.22.12", "go", "bin", "go.exe");
 
 function run(command, commandArgs, options = {}) {
   return spawnSync(command, commandArgs, {
@@ -35,14 +36,28 @@ if (args.has("--clean")) {
   rmSync(binDir, { recursive: true, force: true });
 }
 
-if (!commandExists("go")) {
+const goCommand = commandExists("go") ? "go" : existsSync(portableGo) ? portableGo : null;
+
+if (!goCommand) {
   console.error("Go toolchain not found. Install Go 1.22+ or make sure go is available on PATH.");
   process.exit(1);
 }
 
 mkdirSync(binDir, { recursive: true });
 
-const build = run("go", ["build", "-o", output, "./src/cmd/emberdtl"], { stdio: "inherit" });
+let buildOutput = output;
+if (process.platform !== "win32" && goCommand.toLowerCase().endsWith(".exe")) {
+  const converted = spawnSync("wslpath", ["-w", output], { encoding: "utf8", shell: false });
+  if (converted.status !== 0 || !converted.stdout.trim()) {
+    console.error("Unable to translate the WSL output path for the Windows Go toolchain.");
+    process.exit(1);
+  }
+  buildOutput = converted.stdout.trim();
+}
+
+const build = run(goCommand, ["build", "-o", buildOutput, "./src/cmd/emberdtl"], {
+  stdio: "inherit",
+});
 if (build.status !== 0) {
   process.exit(build.status ?? 1);
 }

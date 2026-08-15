@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { isAbsolute, resolve } from "node:path";
 
 export type AmountEntry = { id: string; amount: number };
@@ -139,7 +139,21 @@ export class EmberClient {
     if (!existsSync(path) || !statSync(path).isFile()) {
       throw new EmberClientError("INVALID_INPUT", `scenario does not exist: ${path}`);
     }
-    return path;
+    return this.processPath(path);
+  }
+
+  private processPath(path: string): string {
+    if (
+      process.platform !== "linux" ||
+      !process.env.WSL_DISTRO_NAME ||
+      !existsSync(this.binaryPath)
+    ) {
+      return path;
+    }
+    const header = readFileSync(this.binaryPath).subarray(0, 2).toString("ascii");
+    const match = /^\/mnt\/([a-z])\/(.*)$/i.exec(path);
+    if (header !== "MZ" || !match) return path;
+    return `${match[1].toUpperCase()}:\\${match[2].replaceAll("/", "\\")}`;
   }
 
   private execute(args: string[]): string {
