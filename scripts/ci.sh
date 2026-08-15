@@ -13,7 +13,7 @@ if ! command -v go >/dev/null 2>&1; then
   gofmt_command="$portable_go/gofmt.exe"
 fi
 
-if [[ "${RUNNER_OS:-}" != "Windows" && "$go_command" != *.exe && "${OSTYPE:-}" != msys* ]]; then
+if [[ "$go_command" != *.exe ]]; then
   unformatted="$("$gofmt_command" -l src)"
   if [[ -n "$unformatted" ]]; then
     echo "Go files require gofmt:"
