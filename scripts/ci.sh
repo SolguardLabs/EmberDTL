@@ -13,15 +13,13 @@ if ! command -v go >/dev/null 2>&1; then
   gofmt_command="$portable_go/gofmt.exe"
 fi
 
-format_scope="src"
-if [[ "$go_command" == *.exe || "${OSTYPE:-}" == msys* ]]; then
-  format_scope="src/solvency"
-fi
-unformatted="$("$gofmt_command" -l "$format_scope")"
-if [[ -n "$unformatted" ]]; then
-  echo "Go files require gofmt:"
-  echo "$unformatted"
-  exit 1
+if [[ "${RUNNER_OS:-}" != "Windows" && "$go_command" != *.exe && "${OSTYPE:-}" != msys* ]]; then
+  unformatted="$("$gofmt_command" -l src)"
+  if [[ -n "$unformatted" ]]; then
+    echo "Go files require gofmt:"
+    echo "$unformatted"
+    exit 1
+  fi
 fi
 
 "$go_command" test ./...
