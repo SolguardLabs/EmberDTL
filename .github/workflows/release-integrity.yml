@@ -30,7 +30,10 @@ jobs:
       - name: Verify production reference
         shell: bash
         run: |
-          git fetch origin main production --tags
+          git fetch origin main --tags
+          if [[ "$GITHUB_REF" == "refs/heads/production" || "$GITHUB_REF" == refs/tags/* || "$GITHUB_EVENT_NAME" == "release" ]]; then
+            git fetch origin production
+          fi
           if [[ "$GITHUB_REF" == "refs/heads/production" ]]; then
             test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)"
           fi
