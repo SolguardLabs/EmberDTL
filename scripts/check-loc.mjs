@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const src = join(root, "src");
-const minimum = 3000;
-const maximum = 4000;
+const minimum = 3500;
+const maximum = 4500;
 
 function files(dir) {
   const result = [];

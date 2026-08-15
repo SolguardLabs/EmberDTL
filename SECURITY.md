@@ -1,59 +1,83 @@
-# Security Policy
+# Política de seguridad
 
-## Modelo De Seguridad
+## Versiones mantenidas
 
-EmberDTL modela un servicio custodial de liquidacion con seguros internos por
-activo. La capa externa se considera responsable de autenticar comandos; el
-motor aplica controles de dominio sobre accounting, limites economicos,
-transiciones de estado y reportes deterministas.
+| Serie   | Estado            |
+| ------- | ----------------- |
+| `1.x`   | Mantenida         |
+| `< 1.0` | Sin mantenimiento |
 
-## Invariantes Esperadas
+La rama `main` representa el estado integrado. La rama `production` identifica el commit publicado y cada entrega estable se marca con un tag anotado `vMAJOR.MINOR.PATCH`.
 
-- Cada pool de seguro pertenece a un unico activo.
-- Una reserve solo acepta depositos del activo configurado.
-- Una facility no puede abrirse por encima del saldo de su reserve.
-- Un repayment no puede superar el outstanding de la facility.
-- Los fees de settlement se separan entre operador y pool de seguro.
-- Un default solo se reporta fuera de su ventana de gracia.
-- Un claim debe estar asociado a un default activo y a cuentas existentes.
-- Un payout de cobertura registra journal, metricas y balance del beneficiario.
-- Una recovery resuelta limpia la exposicion pendiente del default.
+## Límites de confianza
 
-## Validaciones Automatizadas
+EmberDTL es un motor contable. El entorno que lo integra debe autenticar al emisor, autorizar cada rol, limitar el tamaño de la entrada, almacenar el estado durable y serializar comandos concurrentes. El binario no sustituye esos controles de plataforma.
 
-La suite de CI ejecuta:
+```mermaid
+flowchart LR
+    U["Operador autenticado"] --> G["Gateway autorizado"]
+    G --> Q["Cola ordenada"]
+    Q --> E["Motor EmberDTL"]
+    E --> J["Journal inmutable"]
+    E --> S["Snapshot firmado"]
+    S --> M["Monitor de reconciliación"]
+    M -->|desviación| P["Pausa operativa"]
+```
 
-- formato Go mediante `gofmt`;
-- `go test ./...`;
-- `go vet ./...`;
-- build del binario `emberdtl`;
-- tests TypeScript de integracion sobre escenarios JSON;
-- comprobacion de lineas de codigo de `src/`.
+## Controles exigidos al integrador
 
-## Gestion De Dependencias
+- Mapear identidades externas a roles mínimos y negar por defecto.
+- Verificar unicidad de identificadores antes de aceptar un comando.
+- Aplicar exclusión mutua por activo o versión optimista de estado.
+- Fijar límites de entrada, timeout y memoria del proceso.
+- Persistir entrada, hash del ejecutable, salida y número de secuencia.
+- Comparar saldos con una fuente contable independiente.
+- Prohibir cambios de política dentro de una ejecución abierta.
+- Tratar toda salida negativa o desbordamiento como evento de parada.
 
-El motor Go no depende de paquetes externos. La capa Node se usa para scripts,
-tests de integracion y formato de archivos JSON, Markdown y YAML. Dependabot
-revisa modulos Go, dependencias npm y GitHub Actions.
+## Invariantes operativas
 
-## Alcance De Revision
+```mermaid
+flowchart TD
+    C["Comando"] --> A{"Autorizado"}
+    A -->|no| X["Rechazo"]
+    A -->|sí| V{"Precondiciones"}
+    V -->|no| X
+    V -->|sí| T["Transición"]
+    T --> R{"Reconciliación"}
+    R -->|ok| K["Commit y journal"]
+    R -->|desviación| H["Hold y escalado"]
+```
 
-La revision recomendada cubre:
+Las siguientes relaciones deben observarse por activo y por época:
 
-- admision de facilities;
-- accounting de reserves;
-- calculo y reparto de fees;
-- contribuciones al pool;
-- reporte y resolucion de defaults;
-- registro y ejecucion de claims;
-- reconciliacion por activo.
+```text
+free >= 0
+held >= 0
+reserve.balance >= 0
+pool.balance observado >= 0
+facility.outstanding <= facility.principal
+claimedCoverage <= coverageCeiling
+netCoverageBuffer = poolBalance - pendingDefaults - pendingClaims
+```
 
-## Reportes Internos
+El informe de reconciliación es una proyección, no una autorización. Las decisiones de disponibilidad deben incorporar la política vigente, compromisos pendientes, orden de ejecución y controles de concurrencia del entorno.
 
-Los reportes deben incluir:
+## Comunicación responsable
 
-- escenario JSON minimo;
-- salida de `emberdtl run`;
-- version de Go y Node;
-- impacto economico observado;
-- test de regresion propuesto.
+Los hallazgos deben enviarse mediante **GitHub Security Advisories** en la pestaña Security del repositorio. No se deben abrir issues públicos con escenarios que puedan afectar operaciones desplegadas.
+
+Incluya:
+
+- versión, commit y plataforma;
+- escenario JSON mínimo y determinista;
+- resultado esperado y observado;
+- impacto contable por activo;
+- logs sin credenciales ni datos personales;
+- propuesta de prueba de regresión, si existe.
+
+Se confirmará la recepción, se reproducirá el caso en un entorno aislado y se coordinará la publicación de la corrección. No se garantiza soporte para ramas anteriores a `1.x`.
+
+## Gestión de secretos y dependencias
+
+El repositorio no requiere secretos para compilar ni probar. Los workflows usan permisos mínimos, acciones fijadas por versión mayor mantenida y `npm ci` sobre lockfile. Las credenciales de despliegue pertenecen al entorno consumidor y nunca deben incluirse en escenarios, artefactos o trazas.

@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "purpose": "production-compatibility-lock",
+  "files": {
+    "src/risk/risk.go": "26effa9e04b23afdf0cffe7c8651620ca1bf5918",
+    "src/engine/service.go": "abce7ecf154ec22bdc76798b97219133d0823199",
+    "src/insurance/book.go": "689e2204dbf71457442c1b200bbf6d1db3cfff9b",
+    "src/domain/state.go": "3bc330d0a74ee50e418f5b8e8620437680e0a279"
+  }
+}
